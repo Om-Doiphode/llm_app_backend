@@ -8,11 +8,11 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: ["https://hawkeye-gpt.netlify.app/"],  // Add Netlify domain
-    methods: ["GET", "POST", "DELETE", "OPTIONS"],   // Allow necessary methods
-    allowedHeaders: ["Content-Type", "Authorization"]
+    origin: "https://hawkeye-gpt.netlify.app", // Allow your Netlify frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
 }));
-
 
 mongoose.connect(process.env.MONGO_URI,{
     useNewUrlParser: true,
