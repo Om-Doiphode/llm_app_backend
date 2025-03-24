@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Chat from './models/ChatSchema.js';  
 import cors from 'cors';
+import authRoutes from './routes/auth.js';
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -25,6 +26,8 @@ mongoose.connect(process.env.MONGO_URI,{
 app.get('/', (req, res) => {
     res.send('Welcome to the Express.js Tutorial');
 });
+
+app.use('/api/auth', authRoutes);
 
 app.get('/chats', async (req,res)=>{
     try{
