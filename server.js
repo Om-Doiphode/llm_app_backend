@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import Chat from './models/ChatSchema.js';  
 import cors from 'cors';
 import authRoutes from './routes/auth.js';
+import User from './models/User.js';
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -29,35 +30,55 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 
-app.get('/chats', async (req,res)=>{
+app.post('/chats', async (req,res)=>{
     try{
-        const chats = await Chat.find();
+
+        const {userId} = req.body;
+
+        let query={};
+
+        if(userId)
+        {
+            if(!mongoose.Types.ObjectId.isValid(userId))
+            {
+                return res.status(400).json({error:"Invalid User ID format"});
+            }
+            query.user = userId;
+        }
+        const chats = await Chat.find(query).populate("user","username");
         res.status(200).json(chats);
     }
     catch(err){
-        res.status(500).json({error: `Failed to fetch chats: ${err}`});
+        res.status(500).json({error: `Failed to fetch chats: ${err.message}`});
     }
 })
 
 app.post('/addChats', async (req, res)=>{
     try{
         const {user, title, messages} = req.body;
-        console.log("INSIDE")
-        console.log("Chat model:", Chat);
-    
+
+        if(!mongoose.Types.ObjectId.isValid(user)){
+            return res.status(400).json({error: "User ID is not valid"});
+        }
+
+        const existingUser = await User.findById(user);
+        if(!existingUser)
+        {
+            return res.status(404).json({error: "User not found"});
+        }
         const newChat = new Chat({
             user,
             title,
             messages
         });
 
-        console.log("New Chat:", newChat);
+        // console.log("New Chat:", newChat);
     
         await newChat.save();
         res.status(201).json({message: "Chat added successfully"});
     }
     catch(err){
-        res.status(500).json({error: `Failed to add chat: ${err}`});
+        res.status(500).json({error: `Failed to add chat: ${err.message}`});
     }
 })
 
